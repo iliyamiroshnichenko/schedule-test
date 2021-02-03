@@ -3,22 +3,17 @@ import refs from './js/refs';
 import { v4 as uuidv4 } from 'uuid';
 import timeSlotIsBookedError from './js/notifications';
 
-parseLocalSrorage().forEach(({ meetingName, meetingDay, meetingTime }) => {
-  console.log(meetingName, meetingDay, meetingTime);
-  if (refs.table) {
-    const markup = `<span>${meetingName}</span><button class="btn-close" type="button"></button>`;
-    const tableCell = refs.table.querySelector(
-      `[data-time='${meetingTime}'] > [data-day="${meetingDay}"]`,
-    );
-    tableCell.insertAdjacentHTML('beforeend', markup);
-    tableCell.classList.add('active-event');
-  }
-});
+addAllMarkup();
 
 if (refs.form) {
   refs.submitButton.addEventListener('click', submitForm);
   refs.form.querySelector('#radio1').addEventListener('change', changeRadio);
   refs.form.querySelector('#radio2').addEventListener('change', changeRadio);
+}
+
+if (refs.table) {
+  refs.select.addEventListener('change', filterByTeammate);
+  refs.table.addEventListener('click', deleteMeeting);
 }
 
 function submitForm(event) {
@@ -47,8 +42,8 @@ function submitForm(event) {
     if (meetingDay === day && meetingTime === time) {
       timeSlotIsBookedError();
       err = true;
+      event.preventDefault();
     }
-    event.preventDefault();
     return;
   });
   if (!err) localStorage.setItem(uuidv4(), JSON.stringify(newMeeting));
@@ -68,4 +63,71 @@ function parseLocalSrorage() {
     values.push(value);
   }
   return values;
+}
+
+function addAllMarkup() {
+  parseLocalSrorage().forEach(({ meetingName, meetingDay, meetingTime }) => {
+    if (refs.table) {
+      const markup = `<span>${meetingName}</span><button class="btn-close" data-action="delete" type="button"></button>`;
+      const tableCell = refs.table.querySelector(
+        `[data-time='${meetingTime}'] > [data-day="${meetingDay}"]`,
+      );
+      tableCell.innerHTML = '';
+      tableCell.insertAdjacentHTML('beforeend', markup);
+      tableCell.classList.add('active-event');
+    }
+  });
+}
+
+function filterByTeammate(event) {
+  if (event.target.value === 'all-members') {
+    addAllMarkup();
+    return;
+  }
+  parseLocalSrorage().forEach(
+    ({ meetingMembers, meetingName, meetingDay, meetingTime }) => {
+      if (
+        meetingMembers.includes(event.target.value) ||
+        meetingMembers.includes('all-members')
+      ) {
+        const markup = `<span>${meetingName}</span><button class="btn-close" data-action="delete" type="button"></button>`;
+        const tableCell = refs.table.querySelector(
+          `[data-time='${meetingTime}'] > [data-day="${meetingDay}"]`,
+        );
+        tableCell.innerHTML = '';
+        tableCell.insertAdjacentHTML('beforeend', markup);
+        tableCell.classList.add('active-event');
+      } else {
+        const tableCell = refs.table.querySelector(
+          `[data-time='${meetingTime}'] > [data-day="${meetingDay}"]`,
+        );
+        tableCell.innerHTML = '';
+        tableCell.classList.remove('active-event');
+      }
+    },
+  );
+}
+
+function deleteMeeting(event) {
+  if (event.target.nodeName !== 'BUTTON') {
+    return;
+  }
+  const parent = event.target.parentNode;
+  const day = parent.dataset.day;
+  const time = parent.parentNode.dataset.time;
+  for (let key in localStorage) {
+    if (!localStorage.hasOwnProperty(key) || key.length !== 36) {
+      continue;
+    }
+    const value = JSON.parse(localStorage.getItem(key));
+    if (value.meetingDay === day && value.meetingTime === time) {
+      localStorage.removeItem(key);
+      break;
+    }
+  }
+  const tableCell = refs.table.querySelector(
+    `[data-time='${time}'] > [data-day="${day}"]`,
+  );
+  tableCell.innerHTML = '';
+  tableCell.classList.remove('active-event');
 }
