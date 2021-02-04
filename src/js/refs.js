@@ -3,4 +3,5 @@ export default {
   submitButton: document.querySelector('.button-submit'),
   table: document.querySelector('table'),
   select: document.querySelector('.filter-teammate'),
+  confirmDeletingBtn: document.querySelector('#confirm-deleting-event'),
 };

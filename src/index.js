@@ -68,7 +68,7 @@ function parseLocalSrorage() {
 function addAllMarkup() {
   parseLocalSrorage().forEach(({ meetingName, meetingDay, meetingTime }) => {
     if (refs.table) {
-      const markup = `<span>${meetingName}</span><button class="btn-close" data-action="delete" type="button"></button>`;
+      const markup = `<span>${meetingName}</span><button class="btn-close" type="button" data-toggle="modal" data-target="#myModal"></button>`;
       const tableCell = refs.table.querySelector(
         `[data-time='${meetingTime}'] > [data-day="${meetingDay}"]`,
       );
@@ -90,7 +90,7 @@ function filterByTeammate(event) {
         meetingMembers.includes(event.target.value) ||
         meetingMembers.includes('all-members')
       ) {
-        const markup = `<span>${meetingName}</span><button class="btn-close" data-action="delete" type="button"></button>`;
+        const markup = `<span>${meetingName}</span><button class="btn-close" type="button" data-toggle="modal" data-target="#myModal"></button>`;
         const tableCell = refs.table.querySelector(
           `[data-time='${meetingTime}'] > [data-day="${meetingDay}"]`,
         );
@@ -115,19 +115,22 @@ function deleteMeeting(event) {
   const parent = event.target.parentNode;
   const day = parent.dataset.day;
   const time = parent.parentNode.dataset.time;
-  for (let key in localStorage) {
-    if (!localStorage.hasOwnProperty(key) || key.length !== 36) {
-      continue;
-    }
-    const value = JSON.parse(localStorage.getItem(key));
-    if (value.meetingDay === day && value.meetingTime === time) {
-      localStorage.removeItem(key);
-      break;
-    }
-  }
   const tableCell = refs.table.querySelector(
     `[data-time='${time}'] > [data-day="${day}"]`,
   );
-  tableCell.innerHTML = '';
-  tableCell.classList.remove('active-event');
+
+  refs.confirmDeletingBtn.addEventListener('click', () => {
+    for (let key in localStorage) {
+      if (!localStorage.hasOwnProperty(key) || key.length !== 36) {
+        continue;
+      }
+      const value = JSON.parse(localStorage.getItem(key));
+      if (value.meetingDay === day && value.meetingTime === time) {
+        localStorage.removeItem(key);
+        break;
+      }
+    }
+    tableCell.innerHTML = '';
+    tableCell.classList.remove('active-event');
+  });
 }
