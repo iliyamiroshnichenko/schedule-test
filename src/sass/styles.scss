@@ -14,6 +14,9 @@ body {
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   background-color: darkgray;
   padding: 20px;
+  // background: linear-gradient(to right, #6d6027, #d3cbb8);
+  background: linear-gradient(to right, #ff9966, #ff5e62);
+  // background: linear-gradient(to right, #ada996, #f2f2f2, #dbdbdb, #eaeaea);
 }
 
 .flex {
@@ -21,10 +24,26 @@ body {
   align-items: center;
 }
 
-.btn-close {
+.flex-between {
+  justify-content: space-between;
+}
+
+button.btn-close {
   margin-left: 15px;
+  width: 8px;
 }
 
 td.active-event {
+  text-align: center;
   background-color: rgb(133, 155, 94);
+}
+
+.filter-teammate {
+  margin-right: 30px;
+  background-color: darkgray;
+  border: 2px solid black;
+}
+
+.custom-control-label {
+  margin-right: 5px;
 }
